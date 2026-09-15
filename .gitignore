@@ -1,0 +1,7 @@
+dist/
+node_modules/
+*.tsbuildinfo
+
+# `npm pack` to inspect the tarball is a normal thing to do in a publishable
+# package; committing its output is not.
+*.tgz

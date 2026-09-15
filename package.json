@@ -1,0 +1,65 @@
+{
+  "name": "@ailelabs/opencode-plugin",
+  "version": "1.0.0",
+  "description": "Zero-config Aile provider for the opencode CLI — dynamic model discovery and bearer auth against an Aile relay OpenAI/Anthropic-compatible surface.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "bun run scripts/build.js",
+    "dev": "bun run src/index.ts",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "aile",
+    "opencode",
+    "opencode-plugin",
+    "ai-sdk",
+    "relay",
+    "llm"
+  ],
+  "homepage": "https://aile.sh/docs/integrations/opencode",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ailelabs/opencode-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ailelabs/opencode-plugin/issues"
+  },
+  "author": "Aile Labs",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "bun-types": "^1.3.14",
+    "typescript": "^5.6.3"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@opencode-ai/plugin": {
+      "optional": true
+    }
+  }
+}

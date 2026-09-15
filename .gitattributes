@@ -1,0 +1,10 @@
+# Pin LF on every platform, including Windows checkouts.
+#
+# This package publishes with a Sigstore attestation binding the tarball to this
+# source, so "the source you read is the code you run" is checkable with
+# `npm audit signatures`. That claim is about BYTES. A Windows contributor whose
+# checkout converted LF to CRLF commits a file that differs from the one the
+# Linux publish job built, for no reason a reader could ever see — which is the
+# one failure mode the attestation exists to rule out.
+*        text=auto eol=lf
+*.tgz    binary

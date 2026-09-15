@@ -1,0 +1,90 @@
+name: Publish
+
+# Publish @ailelabs/opencode-plugin to npm, with provenance.
+#
+# ============================================================================
+# THIS FILE LIVES INSIDE THE PACKAGE ON PURPOSE. GitHub only reads
+# `.github/workflows` at a repository ROOT, so while this package sits inside
+# the private monorepo this file is inert — and when the package is split out to
+# `ailelabs/opencode-plugin` it lands at that root and becomes the publish
+# workflow, with no step where somebody has to remember to copy it across.
+#
+# WHY PROVENANCE MATTERS MORE HERE THAN FOR AN ORDINARY PACKAGE. This plugin
+# holds a buyer's Aile key and attaches it to outbound inference calls. A tarball
+# differing from this source by one line could send that key somewhere else, and
+# no user could tell by reading the repository. `--provenance` mints a Sigstore
+# attestation binding the published tarball to this repository, this commit and
+# this workflow, so "the source you read is the code you run" becomes checkable:
+#
+#     npm audit signatures
+#
+# PUBLISHING FROM A LAPTOP DEFEATS THIS. Provenance needs a CI OIDC identity, so
+# a manual `npm publish` produces an unattested version sitting in the same
+# registry as the attested ones. Publish here or not at all.
+#
+# TWO PRECONDITIONS THAT ARE NOT IN THIS FILE AND BOTH FAIL THE PUBLISH:
+#
+#   1. THIS REPOSITORY MUST BE PUBLIC. npm generates no provenance for a package
+#      built from a private repository, whatever the package's own visibility.
+#      That is the entire reason the package was split out of the monorepo rather
+#      than published from it — `ailelabs/ailesh` holds the money path, custody
+#      and the deploy scripts, and is not going public for a plugin.
+#
+#   2. `repository.url` IN package.json MUST MATCH, CASE FOR CASE. Sigstore
+#      compares it against the owner/repo in the GitHub OIDC claim and fails with
+#      a 422 on a single differing capital. It reads `ailelabs/opencode-plugin`.
+#
+# AND ONE THAT IS NOT ABOUT CODE: `NPM_TOKEN` must be a repo secret belonging to
+# an npm user with publish rights on the `@ailelabs` scope. The GitHub account
+# that pushes the tag decides who can TRIGGER this; it grants nothing on npm.
+# ============================================================================
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # REQUIRED for provenance — without it the publish is unattested
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Node publishes; bun only builds. npm >= 9.5 is required for --provenance,
+      # and `registry-url` must be set here or npm skips the OIDC exchange and
+      # drops the attestation without saying so.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # FROZEN, because provenance is a claim about WHICH BYTES were built. An
+      # attestation over a tarball whose toolchain floated between the tested
+      # commit and the published one attests the wrong thing. `bun.lock` is
+      # committed for exactly this step.
+      #
+      # It also fences off a live upstream failure: `bun-types` depends on
+      # `@types/node: *`, and `@types/node@26.6.0` is the registry's `latest`
+      # while its TARBALL 404s — a broken publish. An unpinned resolve walks
+      # straight into it and fails this job. `@types/node` is pinned in
+      # devDependencies, and the lockfile holds that pin.
+      - run: bun install --frozen-lockfile
+
+      # The gate. This package handles a buyer's key; a version that cannot pass
+      # its own tests must not reach the machines that will load it.
+      - run: bun test
+
+      - run: bun run build
+
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
