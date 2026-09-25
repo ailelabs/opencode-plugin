@@ -96,6 +96,12 @@ describe("resolveApiBlock", () => {
     expect(b.url).toBe(BASE); // /v1 present → hits /v1/messages
   });
 
+  test("the cc/ alias — how /v1/models lists Claude — also goes to the anthropic adapter", () => {
+    const b = resolveApiBlock("cc/claude-sonnet-5", BASE);
+    expect(b.id).toBe("anthropic");
+    expect(b.npm).toBe("@ai-sdk/anthropic");
+  });
+
   test("openai prefix → openai-compatible", () => {
     const b = resolveApiBlock("openai/gpt-4o", BASE);
     expect(b.id).toBe("openai-compatible");

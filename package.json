@@ -1,6 +1,6 @@
 {
   "name": "@ailelabs/opencode-plugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Zero-config Aile provider for the opencode CLI — dynamic model discovery and bearer auth against an Aile relay OpenAI/Anthropic-compatible surface.",
   "type": "module",
   "main": "./dist/index.js",

@@ -161,6 +161,10 @@ export const DEFAULT_ANTHROPIC_PROVIDER_IDS: readonly string[] = [
   "agentrouter",
   "anthropic",
   "bailian-coding-plan",
+  // `cc` is `claude`'s buyer-facing alias, and it is the prefix Aile's
+  // `/v1/models` actually lists Claude models under (`cc/claude-sonnet-5`).
+  // Without it every listed Claude model fell through to chat completions.
+  "cc",
   "claude",
   "kimi-coding",
   "kimi-coding-apikey",
